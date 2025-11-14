@@ -231,7 +231,10 @@ async function loadPage(newIdx){
 
   mount.appendChild(svg);
   svgEl = svg;
-  resetPageCounters();
+  
+// pintura.js hook
+document.dispatchEvent(new CustomEvent(\"svgLoaded\", { detail: { svgRoot: svg, pageNumber: idx } }));
+resetPageCounters();
   // Atualiza cabeçalho e mantém progresso de clicks
   updateProgressUI();
 
@@ -412,29 +415,7 @@ const serializer = new XMLSerializer();
 }
 
 // ---------- Imprimir somente a arte (A4) ----------
-function printInline(){
-  if(!svgEl) return;
-  const serializer = new XMLSerializer();
-  const svgClone = svgEl.cloneNode(true);
-  inlineComputedStyles(svgClone);
-  // remove event listeners incidentais ao clone, só markup
-  const svgString = serializer.serializeToString(svgClone);
-  const w = window.open('', '_blank');
-  const html = `<!doctype html><html><head><meta charset="utf-8">
-  <style>
-    @page { size: A4 portrait; margin: 10mm; }
-    html,body{height:100%; margin:0; background:#fff;}
-    .box{width:100%; min-height:100%; display:flex; justify-content:center; align-items:center;}
-    svg{width:100%; height:auto;}
-  </style></head><body>
-  <div class="box">${svgString}</div>
-  <script>
-    window.onafterprint = function(){ window.close(); };
-    window.onload = function(){ setTimeout(function(){ window.print(); }, 50); setTimeout(function(){ window.close(); }, 2000); };
-  <\/script>
-  </body></html>`;
-  w.document.open(); w.document.write(html); w.document.close();
-}
+
 
 // ---------- Som ON/OFF ----------
 function toggleSound(){ /* removed: sounds always on */ }
@@ -445,7 +426,6 @@ function toggleSound(){ /* removed: sounds always on */ }
   const prevBtn = $('#prevBtn');   if(prevBtn)   prevBtn.addEventListener('click', prev);
   const nextBtn = $('#nextBtn');   if(nextBtn)   nextBtn.addEventListener('click', next);
   const saveBtn = $('#savePng');   if(saveBtn)   saveBtn.addEventListener('click', savePNG);
-  const printBtn= $('#printBtn');  if(printBtn)  printBtn.addEventListener('click', printInline);
   const undoBtn = $('#undoBtn');   if(undoBtn)   undoBtn.addEventListener('click', undo);
   const redoBtn = $('#redoBtn');   if(redoBtn)   redoBtn.addEventListener('click', redo);
   const erBtn   = $('#eraserBtn'); if(erBtn)     erBtn.addEventListener('click', toggleErase);
